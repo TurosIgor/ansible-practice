@@ -1,0 +1,12 @@
+- name: My first play
+  hosts: myhosts
+  become: true
+  tasks:
+    - name: Gather installed packages
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Print installed packages
+      ansible.builtin.debug:
+        msg: "{{ item.key }} - {{ item.value[0].version }}"
+      with_dict: "{{ ansible_facts.packages }}"
