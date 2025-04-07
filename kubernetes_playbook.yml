@@ -2,27 +2,13 @@
 - name: Get Kubernetes inventory
   ansible.builtin.import_playbook: get_inventory.yml
 
-- name: Check kube version
-  hosts: localhost
-  connection: local
-  tasks:
-    - name: Check kubernetes package version
-      ansible.builtin.raw:
-        pip show kubernetes
-      changed_when: false
-    - name: Check kubectl version
-      ansible.builtin.raw:
-        kubectl version
-      changed_when: false
-
-
 - name: My first play
   hosts: minikube_pods
   connection: kubernetes.core.kubectl
   gather_facts: false
   vars:
     ansible_remote_tmp: "/tmp/ansible-$USER"
-    ansible_kubectl_extra_args: --insecure-skip-tls-verify=False
+    ansible_kubectl_validate_certs: "false"
   tasks:
     - name: Verify pod access
       ansible.builtin.raw:
