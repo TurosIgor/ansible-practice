@@ -6,7 +6,7 @@
   tasks:
     - name: Access cluster
       kubernetes.core.k8s_info:
-        host: https://kuvernetes.default.svc
+        host: https://kubernetes.default.svc
         ca_cert: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         bearer_token: "{{ lookup('file', '/var/run/secrets/kubernetes.io/serviceaccount/token') }}"
 
