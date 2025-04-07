@@ -1,0 +1,20 @@
+---
+- name: Get Kubernetes inventory
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Fetch existing pods
+      kubernetes.core.k8s_info:
+        kind: Pod
+        namespace: default
+      register: pod_info
+
+    - name: Add running pods to inventory
+      ansible.builtin.add_host:
+        name: "pod-{{ item.metadata.name }}"
+        groups: minikube_pods
+        ansible_connection: kubernetes.core.kubectl
+        ansible_kubectl_pod: "{{ item.metadata.name }}"
+      loop: "{{ pod_info.resources }}"
+      when: item.status.phase == "Running"
