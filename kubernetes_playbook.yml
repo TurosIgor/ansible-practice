@@ -4,6 +4,7 @@
 
 - name: My first play
   hosts: minikube_pods
+  connection: kubernetes.core.kubectl
   gather_facts: false
   tasks:
     - name: Verify pod access

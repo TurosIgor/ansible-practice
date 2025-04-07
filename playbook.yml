@@ -4,6 +4,7 @@
 
 - name: My first play
   hosts: minikube_pods
+  connection: kubernetes.core.kubectl
   become: true
   tasks:
     - name: Print hostname
