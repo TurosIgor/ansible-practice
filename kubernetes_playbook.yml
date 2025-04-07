@@ -10,6 +10,11 @@
     ansible_remote_tmp: "/tmp/ansible-$USER"
     ansible_kubectl_extra_args: --insecure-skip-tls-verify=False
   tasks:
+    - name: Check kubernetes version
+      ansible.builtin.raw:
+        kubectl version
+      changed_when: false
+
     - name: Verify pod access
       ansible.builtin.raw:
         echo "Successful connection to {{ ansible_kubectl_pod }}"
