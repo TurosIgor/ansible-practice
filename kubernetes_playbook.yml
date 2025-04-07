@@ -8,7 +8,7 @@
   gather_facts: false
   vars:
     ansible_remote_tmp: "/tmp/ansible-$USER"
-    ansible_kubectl_validate_certs: "false"
+    ansible_kubectl_validate_certs: "true"
   tasks:
     - name: Verify pod access
       ansible.builtin.raw:
