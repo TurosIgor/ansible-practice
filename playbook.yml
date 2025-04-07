@@ -1,12 +1,11 @@
+---
+- name: Provision inventory
+  ansible.builtin.import_playbook: get_inventory.yml
+
 - name: My first play
-  hosts: myhosts
+  hosts: minikube_pods
   become: true
   tasks:
-    - name: Gather installed packages
-      ansible.builtin.package_facts:
-        manager: auto
-
-    - name: Print installed packages
+    - name: Print hostname
       ansible.builtin.debug:
-        msg: "{{ item.key }} - {{ item.value[0].version }}"
-      with_dict: "{{ ansible_facts.packages }}"
+        msg: "Hello from {{ ansible_host }}"
