@@ -5,11 +5,8 @@
   gather_facts: false
   tasks:
     - name: Debug pause
-      ansible.builtin.shell: |
-        sleep infinity &
-        while true; do sleep 3600; done  # 5-minute window for inspection
-      async: 300
-      poll: 0
+      ansible.builtin.pause:
+        minutes: 5
       changed_when: false
 
     - name: Access cluster
