@@ -8,6 +8,7 @@
   gather_facts: false
   vars:
     ansible_remote_tmp: "/tmp/ansible-$USER"
+    ansible_kubectl_extra_args: --insecure-skip-tls-verify=False
   tasks:
     - name: Verify pod access
       ansible.builtin.raw:
