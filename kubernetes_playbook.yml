@@ -6,6 +6,12 @@
   hosts: minikube_pods
   connection: kubernetes.core.kubectl
   gather_facts: false
+  vars:
+    ansible_kubectl_extra_args: |
+      --server={{ lookup('env', 'K8S_AUTH_HOST') }}
+      --token={{ lookup('env', 'K8S_AUTH_API_KEY') }}
+      --insecure-skip-tls-verify
+    ansible_kubectl_namespace: "{{ lookup('env', 'K8S_AUTH_NAMESPACE') | default('default', true) }}"
   tasks:
     - name: Verify pod access
       ansible.builtin.raw:
