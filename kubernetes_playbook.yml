@@ -6,13 +6,13 @@
   hosts: localhost
   connection: local
   tasks:
-    - name: Check kubectl version
-      ansible.builtin.raw:
-        kubectl version
-      changed_when: false
     - name: Check kubernetes package version
       ansible.builtin.raw:
         pip show kubernetes
+      changed_when: false
+    - name: Check kubectl version
+      ansible.builtin.raw:
+        kubectl version
       changed_when: false
 
 
