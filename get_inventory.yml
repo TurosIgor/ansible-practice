@@ -4,6 +4,11 @@
   connection: local
   gather_facts: false
   tasks:
+    - name: Debug pause
+      ansible.builtin.command: sleep 300  # 5-minute window for inspection
+      async: 300
+      poll: 0
+      
     - name: Access cluster
       kubernetes.core.k8s_info:
         host: https://kubernetes.default.svc
