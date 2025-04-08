@@ -1,12 +1,23 @@
 ---
-- name: Provision inventory
+- name: Get Kubernetes inventory
   ansible.builtin.import_playbook: get_inventory.yml
 
-- name: My first play
-  hosts: minikube_pods
-  connection: kubernetes.core.kubectl
-  become: true
+- name: Manage pods
+  hosts: localhost
+  connection: kubectl
+  gather_facts: false
   tasks:
-    - name: Print hostname
+    - name: Verify pod access
+      kubernetes.core.k8s_exec:
+        namespace: default
+        pod: "{{ item.metadata.name }}"
+        command: echo "Successful connection to {{ item.metadata.name }}"
+      changed_when: false
+      when: item.status.phase == "Running"
+      loop: "{{ pods }}"
+      register: connection_test
+
+    - name: Show connection proof
       ansible.builtin.debug:
-        msg: "Hello from {{ ansible_host }}"
+        msg: "{{ item.stdout }}"
+      loop: "{{ connection_test.results }}"
