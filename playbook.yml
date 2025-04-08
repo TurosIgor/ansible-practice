@@ -12,12 +12,14 @@
         api_version: apps/v1
         kind: Deployment
         name: "{{ item.metadata.name }}"
+        namespace: default
         replicas: 5
       loop: "{{ deployments }}"
 
     - name: Get pods of deployments
       kubernetes.core.k8s_info:
         kind: Pod
+        namespace: default
         label_selectors:
           - "app = {{ item.metadata.name }}"
       loop: "{{ deployments }}"
@@ -31,6 +33,7 @@
       kubernetes.core.k8s_scale:
         api_version: v1
         kind: Deployment
+        namespace: default
         name: "{{ item.metadata.name }}"
         replicas: 3
       loop: "{{ deployments }}"
