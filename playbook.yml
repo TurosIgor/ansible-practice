@@ -5,6 +5,7 @@
 - name: Manage pods
   hosts: localhost
   connection: kubectl
+  become: true
   gather_facts: false
   tasks:
     - name: Verify pod access
