@@ -9,17 +9,73 @@
   vars:
     ansible_remote_tmp: "/tmp/ansible-$USER"
   tasks:
-    - name: Verify pod access
-      kubernetes.core.k8s_exec:
-        namespace: default
-        pod: "{{ item.metadata.name }}"
-        command: echo "Successful connection to {{ item.metadata.name }}"
+    - name: Collect running pods to inventory
+      ansible.builtin.add_host:
+        name: "{{ item.metadata.name }}"
+        ansible_connection: kubernetes.core.kubectl
+        ansible_kubectl_pod: "{{ item.metadata.name }}"
       changed_when: false
       when: item.status.phase == "Running"
       loop: "{{ pods }}"
-      register: connection_test
 
-    - name: Show connection proof
-      ansible.builtin.debug:
-        msg: "{{ item.stdout }}"
-      loop: "{{ connection_test.results }}"
+- name: Serve with nginx
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Get nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+      delegate_to: "{{ item.metadata.name }}"
+      loop: "{{ pods }}"
+
+    - name: Copy index.html
+      ansible.builtin.copy:
+        src: /home/turosigor/practices/ansible-practice/k8s/index.html
+        dest: /usr/share/nginx/index.html
+        mode: '0644'
+        remote_src: false
+      delegate_to: "{{ item.metadata.name }}"
+      loop: "{{ pods }}"
+
+    - name: Attach nginx.conf ConfigMap
+      kubernetes.core.k8s:
+        state: patched
+        kind: Pod
+        name: "{{ item.metadata.name }}"
+        definition:
+          spec:
+            containers:
+              volumeMounts:
+                - name: nginx.conf
+                  mountPath: /etc/nginx/nginx.conf
+            volumes:
+              - name: nginx.conf
+                configMap:
+                  name: nginx
+      loop: "{{ pods }}"
+
+    - name: Create exposing service
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          api_version: v1
+          kind: Service
+          metadata:
+            name: webhost-http
+            namespace: default
+          spec:
+            type: NodePort
+            selector:
+              app: webhost
+            ports:
+              - protocol: TCP
+                targetPort: 80
+                port: 80
+
+    - name: Start nginx
+      ansible.builtin.command: nginx -g daemon off;
+      changed_when: true
+      loop: "{{ pods }}"
