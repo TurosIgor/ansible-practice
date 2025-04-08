@@ -19,6 +19,9 @@
     - name: Get pods of deployments
       kubernetes.core.k8s_info:
         kind: Pod
+        wait: true
+        wait_sleep: 10
+        wait_timeout: 300
         namespace: default
         label_selectors:
           - "app = {{ item.metadata.name }}"
