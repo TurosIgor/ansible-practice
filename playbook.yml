@@ -21,6 +21,8 @@
 - name: Serve with nginx
   hosts: localhost
   connection: local
+  vars:
+    ansible_remote_tmp: "/tmp/ansible-$USER"
   gather_facts: false
   tasks:
     - name: Get nginx
