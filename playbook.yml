@@ -9,7 +9,7 @@
   tasks:
     - name: Scale up to 5 replicas
       kubernetes.core.k8s_scale:
-        api_version: v1
+        api_version: apps/v1
         kind: Deployment
         name: "{{ item.metadata.name }}"
         replicas: 5
