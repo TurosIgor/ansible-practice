@@ -4,12 +4,12 @@
   connection: local
   gather_facts: false
   tasks:
-    - name: Fetch existing pods
+    - name: Fetch existing deployments
       kubernetes.core.k8s_info:
-        kind: Pod
+        kind: Deployment
         namespace: default
-      register: pod_info
+      register: deployment_info
 
-    - name: Add running pods to fact
+    - name: Add running deployments to fact
       ansible.builtin.set_fact:
-        pods: "{{ pod_info.resources }}"
+        deployments: "{{ deployment_info.resources }}"
