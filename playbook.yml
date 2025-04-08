@@ -6,6 +6,8 @@
   hosts: localhost
   connection: kubectl
   gather_facts: false
+  vars:
+    ansible_remote_tmp: "/tmp/ansible-$USER"
   tasks:
     - name: Verify pod access
       kubernetes.core.k8s_exec:
