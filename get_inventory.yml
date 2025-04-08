@@ -3,8 +3,6 @@
   hosts: localhost
   connection: local
   gather_facts: false
-  vars:
-    ansible_remote_tmp: "/tmp/ansible-$USER"
   tasks:
     - name: Fetch existing pods
       kubernetes.core.k8s_info:
