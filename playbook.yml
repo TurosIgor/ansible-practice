@@ -20,17 +20,18 @@
       kubernetes.core.k8s_info:
         kind: Pod
         wait: true
-        wait_sleep: 10
+        wait_sleep: 30
         wait_timeout: 300
         namespace: default
         label_selectors:
           - "app = {{ item.metadata.name }}"
-      loop: "{{ deployments }}"
+      with_items: "{{ deployments }}"
       register: pods
 
     - name: Show pod count
       ansible.builtin.debug:
-        msg: "Number of pods: {{ pods | length }}"
+        msg: "Number of replicas in deployment {{ item.item.metadata.name }}: {{ item.resources[0] | length }}"
+      loop: "{{ pods.results }}"
 
     - name: Scale down to 3 replicas
       kubernetes.core.k8s_scale:
