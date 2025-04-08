@@ -12,7 +12,7 @@
     - name: Collect running pods to inventory
       ansible.builtin.add_host:
         name: "{{ item.metadata.name }}"
-        ansible_connection: kubernetes.core.kubectl
+        ansible_connection: local
         ansible_kubectl_pod: "{{ item.metadata.name }}"
       changed_when: false
       when: item.status.phase == "Running"
