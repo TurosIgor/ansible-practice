@@ -1,7 +1,7 @@
 ---
 - name: Get Kubernetes inventory
   hosts: localhost
-  connection: kubectl
+  connection: local
   gather_facts: false
   vars:
     ansible_remote_tmp: "/tmp/ansible-$USER"
