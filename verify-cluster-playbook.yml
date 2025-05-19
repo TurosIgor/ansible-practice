@@ -1,0 +1,14 @@
+---
+- name: Verify cluster health
+  hosts: localhost
+  connection: local
+  roles:
+    - role: verify-nodes
+    - role: verify-component
+      vars:
+        component_kind: Namespace
+        components:
+          - kube-system
+          - kube-public
+          - kube-node-lease
+          - openshift-node
