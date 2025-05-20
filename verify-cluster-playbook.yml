@@ -2,13 +2,14 @@
 - name: Verify cluster health
   hosts: localhost
   connection: local
-  roles:
-    - role: verify-nodes
-    - role: verify-component
+  tasks:
+    - name: Verify Node presence
+      ansible.builtin.include_role:
+        name: verify-nodes
+
+    - name: Verify pod existence
+      ansible.builtin.include_role:
+        name: verify-pods
       vars:
-        component_kind: Namespace
-        components:
-          - kube-system
-          - kube-public
-          - kube-node-lease
-          - openshift-node
+        pod_name: awx-web
+        pod_namespace: awx

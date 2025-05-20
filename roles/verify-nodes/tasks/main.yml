@@ -8,7 +8,7 @@
   ansible.builtin.fail:
     msg: "{{ item.metadata.name }} NOT ready (status: {{ item.status.conditions | selectattr('type', 'equalto', 'Ready') | map(attribute='status') | first }})"
   loop: "{{ nodes.resources }}"
-  when: >
-    item.status.conditions | selectattr('type','equalto','Ready') | map(attribute='status') | first != 'True'
   loop_control:
     label: "{{ item.metadata.name }}"
+  when: >
+    item.status.conditions | selectattr('type','equalto','Ready') | map(attribute='status') | first != 'True'

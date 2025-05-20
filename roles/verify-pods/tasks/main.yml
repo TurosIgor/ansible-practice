@@ -1,0 +1,52 @@
+---
+- name: Get deployment of pod
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    name: "{{ pod_name }}"
+    namespace: "{{ pod_namespace }}"
+  register: deployment
+
+- name: Get statefulset if no deployment
+  kubernetes.core.k8s_info:
+    kind: StatefulSet
+    name: "{{ pod_name }}"
+    namespace: "{{ pod_namespace }}"
+  register: statefulset
+  when: deployment.resources | length == 0
+
+- name: Evaluate deployment or statefulset
+  ansible.builtin.set_fact:
+    controller: "{{ deployment if (deployment.resources | length > 0) else statefulset }}"
+
+- name: Describe controller
+  ansible.builtin.debug:
+    msg: "{{ controller }}"
+
+- name: Check if available replicas exist
+  ansible.builtin.fail:
+    msg: "{{ controller.resources[0].metadata.name }} has no available replicas!"
+  when: controller.resources[0].status.availableReplicas is not defined
+
+- name: Check if available replicas match desired
+  ansible.builtin.fail:
+    msg: "Some replicas aren't ready!\nDesired:{{ controller.resources[0].status.replicas }}\nAvailable:{{ controller.resources[0].status.availableReplicas }}"
+  when: controller.resources[0].status.replicas != controller.resources[0].status.availableReplicas
+
+- name: Get controller's match labels
+  ansible.builtin.debug:
+    msg: "{{ controller.resources[0].spec.selector.matchLabels | items | map('join', '=') }}"
+
+- name: Get all matching pods
+  kubernetes.core.k8s_info:
+    kind: Pod
+    label_selectors: "{{ controller.resources[0].spec.selector.matchLabels | items | map('join', '=') }}"
+  register: pods
+
+- name: Check pods' health
+  ansible.builtin.fail:
+    msg: "Pod {{ item.metadata.name }} is NOT ready!"
+  when: >
+    item.status.conditions | selectattr('type','equalto','Ready') | map(attribute='status') | first != 'True'
+  loop: "{{ pods.resources }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
