@@ -3,10 +3,6 @@
   hosts: localhost
   connection: local
   tasks:
-    - name: Verify Node presence
-      ansible.builtin.include_role:
-        name: verify-nodes
-
     - name: Verify pod existence
       ansible.builtin.include_role:
         name: verify-pods
