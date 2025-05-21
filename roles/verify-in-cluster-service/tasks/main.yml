@@ -1,0 +1,16 @@
+---
+- name: Get service
+  kubernetes.core.k8s_info:
+    kind: Service
+    name: "{{ service_name }}"
+    namespace: "{{ service_namespace }}"
+  register: service
+
+- name: Check for service presence
+  ansible.builtin.fail:
+    msg: "{{ service_name }} is missing!"
+  when: service.resources | length == 0
+
+- name: Query service
+  ansible.builtin.uri:
+    url: "{{ protocol }}://{{ service_name }}.{{ service_namespace }}.svc.cluster.local/{{ path }}"

@@ -14,32 +14,58 @@
   register: statefulset
   when: deployment.resources | length == 0
 
-- name: Evaluate deployment or statefulset
+- name: Get daemonset if no deployment or statefulset
+  kubernetes.core.k8s_info:
+    kind: DaemonSet
+    name: "{{ pod_name }}"
+    namespace: "{{ pod_namespace }}"
+  register: daemonset
+  when: deployment.resources | length == 0 and statefulset.resources | length == 0
+
+- name: Evaluate controller
   ansible.builtin.set_fact:
-    controller: "{{ deployment if (deployment.resources | length > 0) else statefulset }}"
+    controller: "{{ deployment if (deployment.resources | length > 0) else statefulset if (deployment.resources | length > 0) else daemonset }}"
 
 - name: Describe controller
   ansible.builtin.debug:
     msg: "{{ controller }}"
 
+- name: Get available replicas
+  ansible.builtin.set_fact:
+    available_replicas: >-
+      "{{ controller.resources[0].status.availableReplicas
+        if controller.resources[0].status.availableReplicas is defined
+        else controller.resources[0].status.numberAvailable }}"
+
+- name: Get desired replicas
+  ansible.builtin.set_fact:
+    desired_replicas: >-
+      "{{ (controller.resources[0].spec.replicas)
+        if controller.resources[0].spec.replicas is defined
+        else controller.resources[0].status.desiredNumberScheduled }}"
+
+- name: Describe replica info
+  ansible.builtin.debug:
+    msg: "Desired:{{ desired_replicas }} Available:{{ available_replicas }}"
+
 - name: Check if available replicas exist
   ansible.builtin.fail:
     msg: "{{ controller.resources[0].metadata.name }} has no available replicas!"
-  when: controller.resources[0].status.availableReplicas is not defined
+  when: available_replicas is not defined
 
 - name: Check if available replicas match desired
   ansible.builtin.fail:
-    msg: "Some replicas aren't ready!\nDesired:{{ controller.resources[0].status.replicas }}\nAvailable:{{ controller.resources[0].status.availableReplicas }}"
-  when: controller.resources[0].status.replicas != controller.resources[0].status.availableReplicas
+    msg: "Some replicas aren't ready!\nDesired:{{ desired_replicas }}\nAvailable:{{ available_replicas }}"
+  when: desired_replicas | int > available_replicas | int
 
 - name: Get controller's match labels
-  ansible.builtin.debug:
-    msg: "{{ controller.resources[0].spec.selector.matchLabels | items | map('join', '=') }}"
+  ansible.builtin.set_fact:
+    match_labels: "{{ controller.resources[0].spec.selector.matchLabels | items | map('join', '=') }}"
 
 - name: Get all matching pods
   kubernetes.core.k8s_info:
     kind: Pod
-    label_selectors: "{{ controller.resources[0].spec.selector.matchLabels | items | map('join', '=') }}"
+    label_selectors: "{{ match_labels }}"
   register: pods
 
 - name: Check pods' health
