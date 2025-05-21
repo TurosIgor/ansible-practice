@@ -11,5 +11,14 @@
       ansible.builtin.include_role:
         name: verify-pods
       vars:
-        pod_name: awx-web
-        pod_namespace: awx
+        pod_name: loki-gateway
+        pod_namespace: loki
+
+    - name: Verify service health
+      ansible.builtin.include_role:
+        name: verify-in-cluster-service
+      vars:
+        service_name: loki-gateway
+        service_namespace: loki
+        protocol: http
+        path: ''
