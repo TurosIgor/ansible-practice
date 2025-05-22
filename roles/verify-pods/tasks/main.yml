@@ -1,4 +1,15 @@
 ---
+- name: Get namespace
+  kubernetes.core.k8s_info:
+    kind: Namespace
+    name: "{{ pod_namespace }}"
+  register: ns
+
+- name: Check for namespace presence
+  ansible.builtin.fail:
+    msg: "Namespace '{{ pod_namespace }}' is missing!"
+  when: ns.resources | length == 0
+
 - name: Get deployment of pod
   kubernetes.core.k8s_info:
     kind: Deployment
@@ -36,17 +47,17 @@
 - name: Get available replicas
   ansible.builtin.set_fact:
     available_replicas: >-
-      "{{ controller.status.availableReplicas
+      {{ controller.status.availableReplicas
         if controller.status.availableReplicas is defined
         else controller.status.numberAvailable
-        if controller.status.numberAvailable is defined }}"
+        if controller.status.numberAvailable is defined }}
 
 - name: Get desired replicas
   ansible.builtin.set_fact:
     desired_replicas: >-
-      "{{ (controller.spec.replicas)
+      {{ (controller.spec.replicas)
         if controller.spec.replicas is defined
-        else controller.status.desiredNumberScheduled }}"
+        else controller.status.desiredNumberScheduled }}
 
 - name: Describe replica info
   ansible.builtin.debug:
@@ -59,8 +70,11 @@
 
 - name: Check if available replicas match desired
   ansible.builtin.fail:
-    msg: "Some replicas aren't ready!\nDesired:{{ desired_replicas }}\nAvailable:{{ available_replicas }}"
-  when: desired_replicas | int > available_replicas | int
+    msg: >
+      Some replicas aren't ready!
+      Desired:{{ desired_replicas }}
+      Available:{{ available_replicas }}
+  when: desired_replicas > available_replicas
 
 - name: Get controller's match labels
   ansible.builtin.set_fact:
