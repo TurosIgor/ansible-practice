@@ -24,7 +24,10 @@
 
 - name: Evaluate controller
   ansible.builtin.set_fact:
-    controller: "{{ deployment.resources[0] if (deployment.resources | length > 0) else statefulset.resources[0] if (deployment.resources | length > 0) else daemonset.resources[0] }}"
+    controller: >-
+      "{{ deployment.resources[0] if (deployment.resources | length > 0)
+        else statefulset.resources[0] if (deployment.resources | length > 0)
+        else daemonset.resources[0] }}"
 
 - name: Describe controller
   ansible.builtin.debug:
