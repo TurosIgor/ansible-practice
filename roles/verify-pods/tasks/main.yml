@@ -24,7 +24,7 @@
 
 - name: Evaluate controller
   ansible.builtin.set_fact:
-    controller: "{{ deployment if (deployment.resources | length > 0) else statefulset if (deployment.resources | length > 0) else daemonset }}"
+    controller: "{{ deployment.resources[0] if (deployment.resources | length > 0) else statefulset.resources[0] if (deployment.resources | length > 0) else daemonset.resources[0] }}"
 
 - name: Describe controller
   ansible.builtin.debug:
@@ -33,17 +33,17 @@
 - name: Get available replicas
   ansible.builtin.set_fact:
     available_replicas: >-
-      "{{ controller.resources[0].status.availableReplicas
-        if controller.resources[0].status.availableReplicas is defined
-        else controller.resources[0].status.numberAvailable
-        if controller.resources[0].status.numberAvailable is defined }}"
+      "{{ controller.status.availableReplicas
+        if controller.status.availableReplicas is defined
+        else controller.status.numberAvailable
+        if controller.status.numberAvailable is defined }}"
 
 - name: Get desired replicas
   ansible.builtin.set_fact:
     desired_replicas: >-
-      "{{ (controller.resources[0].spec.replicas)
-        if controller.resources[0].spec.replicas is defined
-        else controller.resources[0].status.desiredNumberScheduled }}"
+      "{{ (controller.spec.replicas)
+        if controller.spec.replicas is defined
+        else controller.status.desiredNumberScheduled }}"
 
 - name: Describe replica info
   ansible.builtin.debug:
@@ -51,7 +51,7 @@
 
 - name: Check if available replicas exist
   ansible.builtin.fail:
-    msg: "{{ controller.resources[0].metadata.name }} has no available replicas!"
+    msg: "{{ controller.metadata.name }} has no available replicas!"
   when: available_replicas is not defined
 
 - name: Check if available replicas match desired
@@ -61,7 +61,7 @@
 
 - name: Get controller's match labels
   ansible.builtin.set_fact:
-    match_labels: "{{ controller.resources[0].spec.selector.matchLabels | items | map('join', '=') }}"
+    match_labels: "{{ controller.spec.selector.matchLabels | items | map('join', '=') }}"
 
 - name: Get all matching pods
   kubernetes.core.k8s_info:
