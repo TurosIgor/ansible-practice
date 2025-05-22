@@ -16,5 +16,5 @@
       vars:
         service_name: kube-prometheus-stack-operator
         service_namespace: prometheus
-        protocol: http
+        protocol: https
         path: ''
