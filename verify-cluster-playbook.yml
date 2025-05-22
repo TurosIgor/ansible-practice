@@ -7,8 +7,8 @@
       ansible.builtin.include_role:
         name: verify-pods
       vars:
-        pod_name: grafana
-        pod_namespace: grafana
+        pod_name: loki
+        pod_namespace: loki
 
     - name: Verify service health
       ansible.builtin.include_role:
