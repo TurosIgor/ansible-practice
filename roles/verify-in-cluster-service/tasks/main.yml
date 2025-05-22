@@ -15,6 +15,6 @@
   ansible.builtin.uri:
     url: "{{ protocol }}://{{ service_name }}.{{ service_namespace }}.svc.cluster.local/{{ path }}"
     validate_certs: "{{ validate_certs }}"
-    ca_path: "{{ ca_path }}"
-    client_cert: "{{ client_cert }}"
-    client_key: "{{ client_key }}"
+    ca_path: "{{ ca_path | default('') }}"
+    client_cert: "{{ client_cert | default('') }}"
+    client_key: "{{ client_key | default('') }}"
