@@ -35,7 +35,8 @@
     available_replicas: >-
       "{{ controller.resources[0].status.availableReplicas
         if controller.resources[0].status.availableReplicas is defined
-        else controller.resources[0].status.numberAvailable }}"
+        else controller.resources[0].status.numberAvailable
+        if controller.resources[0].status.numberAvailable is defined }}"
 
 - name: Get desired replicas
   ansible.builtin.set_fact:
