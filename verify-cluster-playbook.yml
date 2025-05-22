@@ -14,8 +14,8 @@
       ansible.builtin.include_role:
         name: verify-in-cluster-service
       vars:
-        service_name: kube-prometheus-stack-operator
-        service_namespace: prometheus
+        service_name: kubernetes
+        service_namespace: default
         protocol: https
         path: 'readyz'
         validate_certs: false
