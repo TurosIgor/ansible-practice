@@ -17,5 +17,5 @@
         service_name: kube-prometheus-stack-operator
         service_namespace: prometheus
         protocol: https
-        path: ''
+        path: 'readyz'
         validate_certs: false
