@@ -18,3 +18,4 @@
         service_namespace: prometheus
         protocol: https
         path: ''
+        validate_certs: false
