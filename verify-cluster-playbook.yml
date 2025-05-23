@@ -19,3 +19,12 @@
         protocol: https
         path: 'readyz'
         validate_certs: false
+
+    - name: Verify external domain
+      ansible.builtin.include_role:
+        name: verify-external-domain
+      vars:
+        route_name: taboo
+        service_namespace: taboo
+        protocol: http
+        validate_certs: false
