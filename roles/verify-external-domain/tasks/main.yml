@@ -1,0 +1,27 @@
+---
+- name: Get route
+  kubernetes.core.k8s_info:
+    kind: Ingress
+    name: "{{ route_name }}"
+    namespace: "{{ service_namespace }}"
+  register: route
+
+- name: Check for route presence
+  ansible.builtin.fail:
+    msg: "{{ route_name }} is missing!"
+  when: route.resources | length == 0
+
+- name: Describe route
+  ansible.builtin.debug:
+    msg: "{{ route }}"
+
+- name: Get external domain
+  ansible.builtin.set_fact:
+    external_url: "{{ protocol }}://{{ route.resources[0].spec.rules[0].host }}/{{ path | default('') }}"
+
+- name: Query external domain
+  ansible.builtin.uri:
+    url: "{{ external_url }}"
+    validate_certs: "{{ validate_certs }}"
+    return_content: true
+  register: result
